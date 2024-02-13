@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>MyValentine</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&amp;display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    #root {
+      background-image: url('https://img.freepik.com/free-vector/hand-painted-watercolor-pastel-sky-cloud-background_41066-1948.jpg?size=626&ext=jpg&ga=GA1.1.87170709.1707782400&semt=ais');
+      background-size: cover;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    .content {
+      text-align: center;
+    }
+    .yes-button, .no-button {
+      cursor: pointer;
+      font-size: 24px;
+      padding: 10px 20px;
+      margin: 10px;
+    }
+    .no-button {
+      position: absolute;
+    }
+
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1; 
+      padding-top: 100px; 
+      left: 0;
+      top: 0;
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.4); 
+    }
+
+    .modal-content {
+      margin: auto;
+      display: block;
+      width: 80%;
+      max-width: 700px;
+    }
+
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="content">
+      <h1>Will You Be </h1>
+      <h1>My Valentine?</h1>
+      <div>
+        <button class="yes-button" onclick="openModal()">Yes</button>
+        <button class="no-button">No</button>
+      </div>
+    </div>
+  </div>
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img src="https://img.freepik.com/premium-vector/i-love-you-text-hand-written-i-love-you-phrase-vector-illustration_592964-434.jpg" alt="Valentine's Image">
+    </div>
+  </div>
+
+  <script type="module" crossorigin="" src="assets/index-XYTJBlpl.js"></script>
+  <script>
+    const noButton = document.querySelector('.no-button');
+
+    const moveButton = () => {
+      const maxX = window.innerWidth - noButton.clientWidth;
+      const maxY = window.innerHeight - noButton.clientHeight;
+      const newX = Math.random() * maxX;
+      const newY = Math.random() * maxY;
+      
+      noButton.style.left = `${newX}px`;
+      noButton.style.top = `${newY}px`;
+    };
+
+    noButton.addEventListener('mouseover', moveButton);
+
+    function openModal() {
+      document.getElementById("myModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("myModal").style.display = "none";
+    }
+  </script>
+</body>
+</html>
