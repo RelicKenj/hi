@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Letter For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2c1810;
+    --red: #c0392b;
+    --gold: #b8860b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a0f0a;
+    font-family: 'Cormorant Garamond', serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Petals */
+  .petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .petal {
+    position: absolute;
+    background: radial-gradient(ellipse, #e8a0a0 0%, #c0392b55 100%);
+    border-radius: 50% 0 50% 0;
+    opacity: 0;
+    animation: fall linear infinite;
+  }
+  @keyframes fall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* Vignette */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, #0d0806 100%);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Hint */
+  .hint {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    color: #8a6550; font-size: 0.8rem; letter-spacing: 0.2em;
+    text-transform: uppercase; z-index: 10; white-space: nowrap;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+
+  /* === ENVELOPE === */
+  .scene { position: relative; z-index: 5; perspective: 1000px; }
+
+  .envelope-wrap {
+    cursor: pointer;
+    position: relative;
+    width: min(320px, 85vw);
+    height: min(220px, calc(85vw * 0.6875));
+    filter: drop-shadow(0 20px 60px rgba(192,57,43,0.3));
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), filter 0.3s;
+  }
+  .envelope-wrap:hover {
+    transform: scale(1.05) translateY(-6px);
+    filter: drop-shadow(0 30px 80px rgba(192,57,43,0.5));
+  }
+  .envelope-wrap.opened { animation: envelopeShake 0.5s ease; }
+  @keyframes envelopeShake {
+    0%,100% { transform: scale(1.05) rotate(0deg); }
+    25%     { transform: scale(1.05) rotate(-3deg); }
+    75%     { transform: scale(1.05) rotate(3deg); }
+  }
+
+  .envelope-body {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, #f5ede0 0%, #e8d8c4 100%);
+    border-radius: 4px; overflow: hidden;
+    box-shadow: inset 0 0 40px rgba(44,24,16,0.08);
+  }
+  .envelope-body::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(135deg, transparent 49.5%, rgba(44,24,16,0.08) 49.5%, rgba(44,24,16,0.08) 50.5%, transparent 50.5%),
+      linear-gradient(225deg, transparent 49.5%, rgba(44,24,16,0.08) 49.5%, rgba(44,24,16,0.08) 50.5%, transparent 50.5%);
+  }
+
+  .flap-left, .flap-right, .flap-bottom {
+    position: absolute;
+    background: linear-gradient(to bottom, #ecd9c4, #ddc9b0);
+  }
+  .flap-left  { left:0; top:0; bottom:0; width:50%; clip-path: polygon(0 0, 0 100%, 100% 50%); }
+  .flap-right { right:0; top:0; bottom:0; width:50%; clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+  .flap-bottom {
+    left:0; right:0; bottom:0; height:50%;
+    clip-path: polygon(0 100%, 100% 100%, 50% 0);
+    background: linear-gradient(to top, #e8d5c0, #dcc8b0);
+  }
+
+  /* Top flap — opens only on click (.opened) */
+  .flap-top {
+    position: absolute; left:0; right:0; top:0; height:50%;
+    background: linear-gradient(to bottom, #f0e6d4, #e2ceb8);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    transition: transform 0.6s cubic-bezier(.4,0,.2,1);
+    z-index: 4;
+  }
+  .envelope-wrap.opened .flap-top { transform: rotateX(-160deg); }
+
+  /* Wax seal — hides only on click (.opened) */
+  .seal {
+    position: absolute; left:50%; top:50%;
+    transform: translate(-50%, -50%);
+    width: min(52px, 16vw); height: min(52px, 16vw);
+    z-index: 5;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+  .envelope-wrap.opened .seal {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  .seal-circle {
+    width: 100%; height: 100%;
+    background: radial-gradient(circle at 35% 35%, #e05555, #8b1a1a);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 12px rgba(139,26,26,0.6), inset 0 1px 3px rgba(255,255,255,0.2);
+    font-size: clamp(1rem, 4vw, 1.5rem);
+  }
+
+  /* Letter peek — rises only on click (.opened) */
+  .letter-peek {
+    position: absolute; left:20px; right:20px; bottom:10px; height:80%;
+    background: #fdf8f0; border-radius:2px; z-index:3;
+    transform: translateY(0);
+    transition: transform 0.6s cubic-bezier(.4,0,.2,1) 0.1s;
+    box-shadow: 0 -2px 10px rgba(44,24,16,0.1);
+  }
+  .envelope-wrap.opened .letter-peek { transform: translateY(-40%); }
+
+  /* === MODAL === */
+  .overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    background: rgba(10,5,3,0);
+    backdrop-filter: blur(0px);
+    pointer-events: none;
+    transition: background 0.5s ease, backdrop-filter 0.5s ease;
+  }
+  .overlay.show {
+    background: rgba(10,5,3,0.82);
+    backdrop-filter: blur(6px);
+    pointer-events: all;
+  }
+
+  /* === LETTER CARD === */
+  .letter-card {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fdf8f0;
+    border-radius: 3px;
+    padding: clamp(28px, 8vw, 56px) clamp(24px, 8vw, 52px) clamp(28px, 6vw, 48px);
+    box-shadow:
+      0 40px 100px rgba(10,5,3,0.5),
+      0 0 0 1px rgba(184,134,11,0.15),
+      inset 0 0 60px rgba(184,134,11,0.04);
+    transform: scale(0.85) translateY(40px);
+    opacity: 0;
+    transition: transform 0.5s cubic-bezier(.34,1.3,.64,1) 0.15s, opacity 0.4s ease 0.1s;
+  }
+  .overlay.show .letter-card { transform: scale(1) translateY(0); opacity: 1; }
+
+  /* Ruled lines */
+  .letter-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      transparent, transparent 31px,
+      rgba(184,134,11,0.07) 31px, rgba(184,134,11,0.07) 32px
+    );
+    top: 80px; pointer-events: none;
+  }
+  /* Red margin */
+  .letter-card::after {
+    content: ''; position: absolute;
+    left: clamp(48px, 12vw, 72px); top:0; bottom:0; width:1px;
+    background: rgba(192,57,43,0.2);
+  }
+
+  .letter-date {
+    font-size: clamp(0.68rem, 2.5vw, 0.78rem);
+    letter-spacing: 0.18em; color: #a08060;
+    text-transform: uppercase; margin-bottom: clamp(16px, 4vw, 28px);
+    position: relative;
+  }
+  .letter-salutation {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: clamp(1.2rem, 5vw, 1.55rem);
+    color: var(--ink); margin-bottom: clamp(14px, 4vw, 22px); line-height: 1.3;
+  }
+  .letter-body {
+    font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+    line-height: 1.9; color: #3a2218; font-weight: 300; position: relative;
+  }
+  .letter-body p { margin-bottom: clamp(10px, 3vw, 16px); }
+  .letter-body em { font-style: italic; color: #c0392b; font-weight: 400; }
+
+  .letter-closing {
+    margin-top: clamp(16px, 4vw, 28px);
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+    color: var(--ink); line-height: 1.8;
+  }
+  .letter-signature {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+    color: var(--ink); margin-top: 6px;
+  }
+
+  .flourish    { position:absolute; top:14px; right:16px; font-size:clamp(1rem,4vw,1.4rem); opacity:.35; color:var(--gold); }
+  .flourish-bl { position:absolute; bottom:14px; left:16px; font-size:clamp(0.8rem,3vw,1.1rem); opacity:.25; color:var(--gold); }
+
+  .close-btn {
+    position: absolute; top: 12px; right: 12px;
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    color: #b09070; font-size: 1.2rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; transition: background .2s, color .2s; z-index: 10;
+  }
+  .close-btn:hover { background: rgba(192,57,43,0.1); color: #c0392b; }
+
+  @keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.3)} 28%{transform:scale(1)} }
+  .heart { display: inline-block; animation: heartbeat 2s ease-in-out infinite; }
+
+  /* Scrollbar styling for letter on small screens */
+  .letter-card::-webkit-scrollbar { width: 4px; }
+  .letter-card::-webkit-scrollbar-track { background: transparent; }
+  .letter-card::-webkit-scrollbar-thumb { background: rgba(184,134,11,0.3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="petals" id="petals"></div>
+<p class="hint">click the envelope</p>
+
+<div class="scene">
+  <div class="envelope-wrap" id="envelope" title="Open the letter">
+    <div class="envelope-body">
+      <div class="flap-left"></div>
+      <div class="flap-right"></div>
+      <div class="flap-bottom"></div>
+      <div class="letter-peek"></div>
+      <div class="flap-top"></div>
+      <div class="seal"><div class="seal-circle">💌</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="letter-card">
+    <button class="close-btn" id="closeBtn" title="Close">✕</button>
+    <span class="flourish">❧</span>
+    <span class="flourish-bl">✦</span>
+
+    <div class="letter-date">March 27, 2026</div>
+    <div class="letter-salutation">Dear Angel,</div>
+    <div class="letter-body">
+      <p>I've been meaning to tell you something that's been on my mind for a while now. I didn't want to rush or say it at the wrong time — but I've realized that sometimes the right time is the one you choose to make right.</p>
+      <p>The truth is, <em>I like you.</em> I like the way you talk, the way you smile, even the way you think. You're a very interesting person. I know this might seem out of nowhere, and I don't fully know you yet — but that's exactly it. <em>I love the idea of getting to know you more.</em></p>
+      <p>I don't expect anything, and I don't want to pressure you. I just wanted to be honest about how I feel. Whatever your response may be, I'll respect it — and I won't treat you any differently than I already have.</p>
+    </div>
+    <div class="letter-closing">
+      ,<br>
+      <div class="letter-signature"><span class="heart">❤</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Petals
+  const petalsEl = document.getElementById('petals');
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    const size = 6 + Math.random() * 8;
+    p.style.cssText = `left:${Math.random()*100}%;width:${size}px;height:${size*1.4}px;animation-duration:${6+Math.random()*10}s;animation-delay:${Math.random()*12}s;`;
+    petalsEl.appendChild(p);
+  }
+
+  const envelope = document.getElementById('envelope');
+  const overlay  = document.getElementById('overlay');
+  const closeBtn = document.getElementById('closeBtn');
+
+  function openLetter() {
+    envelope.classList.add('opened');
+    setTimeout(() => overlay.classList.add('show'), 400);
+  }
+  function closeLetter() {
+    overlay.classList.remove('show');
+    setTimeout(() => envelope.classList.remove('opened'), 300);
+  }
+
+  envelope.addEventListener('click', openLetter);
+  closeBtn.addEventListener('click', e => { e.stopPropagation(); closeLetter(); });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeLetter(); });
+</script>
+</body>
+</html>
